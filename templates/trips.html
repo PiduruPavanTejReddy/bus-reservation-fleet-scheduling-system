@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Trips & Schedules &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Trips & Fleet Schedules</h3>
+        <p class="text-muted small mb-0">Core operational entity coordinating bus assets, transit routes, schedules, fares, and crew assignments.</p>
+    </div>
+    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#scheduleTripModal">
+        <i class="bi bi-calendar-plus me-1"></i> Schedule New Trip
+    </button>
+</div>
+
+<div class="custom-card">
+    <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history text-primary"></i>
+            <span>Fleet Trip Schedule Ledger ({{ trips|length }} Trips)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Route</th>
+                        <th>Bus</th>
+                        <th>Departure</th>
+                        <th>Arrival</th>
+                        <th>Fare</th>
+                        <th>Occupancy</th>
+                        <th>Rostered Crew</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in trips %}
+                    <tr>
+                        <td class="fw-bold text-muted">#{{ t.trip_id }}</td>
+                        <td>
+                            <div class="fw-semibold text-primary">{{ t.route_name }}</div>
+                            <small class="text-muted">{{ t.source }} &rarr; {{ t.destination }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ t.bus_number }}</span>
+                            <div class="small text-muted">{{ t.bus_type }}</div>
+                        </td>
+                        <td>
+                            <div>{{ t.departure_time.strftime('%d %b, %Y') }}</div>
+                            <small class="text-muted">{{ t.departure_time.strftime('%I:%M %p') }}</small>
+                        </td>
+                        <td>
+                            <div>{{ t.arrival_time.strftime('%d %b, %Y') }}</div>
+                            <small class="text-muted">{{ t.arrival_time.strftime('%I:%M %p') }}</small>
+                        </td>
+                        <td class="fw-semibold text-dark">
+                            ₹{{ "{:,.2f}".format(t.fare or 0.0) }}
+                        </td>
+                        <td>
+                            <div class="small fw-semibold">{{ t.booked_seats }} / {{ t.total_seats }} booked</div>
+                            <div class="progress" style="height: 6px; width: 100px;">
+                                <div class="progress-bar bg-success" style="width: {{ (t.booked_seats / t.total_seats * 100)|round }}%;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                {% if t.driver_name %}
+                                <i class="bi bi-person text-secondary"></i> {{ t.driver_name }} (D)
+                                {% else %}
+                                <span class="text-muted small">No Driver</span>
+                                {% endif %}
+                            </div>
+                            <div class="small text-muted">
+                                {% if t.conductor_name %}
+                                <i class="bi bi-person-badge text-secondary"></i> {{ t.conductor_name }} (C)
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-status badge-{{ t.trip_status.lower() }}">{{ t.trip_status }}</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Manage
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <a class="dropdown-item text-primary" href="{{ url_for('book_seat_page', trip_id=t.trip_id) }}">
+                                            <i class="bi bi-ticket me-2"></i> Book Seats
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('update_trip_status', trip_id=t.trip_id) }}">
+                                            <input type="hidden" name="trip_status" value="PUBLISHED">
+                                            <button type="submit" class="dropdown-item"><i class="bi bi-broadcast me-2"></i> Set PUBLISHED</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('update_trip_status', trip_id=t.trip_id) }}">
+                                            <input type="hidden" name="trip_status" value="COMPLETED">
+                                            <button type="submit" class="dropdown-item text-success"><i class="bi bi-check2-circle me-2"></i> Mark COMPLETED</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('update_trip_status', trip_id=t.trip_id) }}">
+                                            <input type="hidden" name="trip_status" value="CANCELLED">
+                                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-x-circle me-2"></i> Cancel Trip</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">No trips currently scheduled.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Trip Modal -->
+<div class="modal fade" id="scheduleTripModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('add_trip') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Schedule New Fleet Trip</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Route</label>
+                            <select name="route_id" class="form-select" required>
+                                <option value="">-- Select Route --</option>
+                                {% for r in routes %}
+                                <option value="{{ r.route_id }}">{{ r.route_name }} ({{ r.source }} &rarr; {{ r.destination }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Bus Fleet Unit</label>
+                            <select name="bus_id" class="form-select" required>
+                                <option value="">-- Select Bus --</option>
+                                {% for b in buses %}
+                                <option value="{{ b.bus_id }}">{{ b.bus_number }} &bull; {{ b.bus_type }} ({{ b.total_seats }} seats)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Departure Time</label>
+                            <input type="datetime-local" name="departure_time" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Arrival Time</label>
+                            <input type="datetime-local" name="arrival_time" class="form-control" required>
+                            <small class="text-muted">Must be later than departure time (CHECK constraint).</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Ticket Fare (INR)</label>
+                            <input type="number" step="10" name="fare_amount" class="form-control" placeholder="e.g. 850" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Initial Status</label>
+                            <select name="trip_status" class="form-select">
+                                <option value="PUBLISHED" selected>PUBLISHED (Open for booking)</option>
+                                <option value="SCHEDULED">SCHEDULED (Internal)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Assign Driver (Optional)</label>
+                            <select name="driver_id" class="form-select">
+                                <option value="">-- None / Assign Later --</option>
+                                {% for d in drivers %}
+                                <option value="{{ d.driver_id }}">{{ d.name }} ({{ d.phone }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Assign Conductor (Optional)</label>
+                            <select name="conductor_id" class="form-select">
+                                <option value="">-- None / Assign Later --</option>
+                                {% for c in conductors %}
+                                <option value="{{ c.conductor_id }}">{{ c.name }} ({{ c.phone }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule Trip & Configure Fare</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Passengers &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Passenger Directory</h3>
+        <p class="text-muted small mb-0">Customer entities with normalized phone, email, demographics, and lifetime booking records (3NF).</p>
+    </div>
+    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#addPassengerModal">
+        <i class="bi bi-person-plus me-1"></i> Add Passenger
+    </button>
+</div>
+
+<!-- Search Bar -->
+<div class="custom-card mb-4">
+    <div class="card-body p-3">
+        <form method="GET" action="{{ url_for('passengers') }}" class="row g-2 align-items-center">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search by name, phone number, or email address..." value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+                {% if search_query %}
+                <a href="{{ url_for('passengers') }}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="custom-card">
+    <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-people text-primary"></i>
+            <span>Registered Customers ({{ passengers|length }} Found)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Passenger Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Demographics</th>
+                        <th class="text-center">Total Bookings</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in passengers %}
+                    <tr>
+                        <td class="fw-bold text-muted">#{{ p.passenger_id }}</td>
+                        <td class="fw-semibold text-primary">{{ p.name }}</td>
+                        <td>{{ p.phone }}</td>
+                        <td><code>{{ p.email }}</code></td>
+                        <td>{{ p.gender }} &bull; {{ p.age }} yrs</td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary-subtle text-dark">{{ p.total_bookings }} Trips</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('passenger_history', passenger_id=p.passenger_id) }}" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                <i class="bi bi-clock-history me-1"></i> History
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No passengers found matching search criteria.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Passenger Modal -->
+<div class="modal fade" id="addPassengerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('add_passenger') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Register New Passenger Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Full Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Meera Nambiar" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mobile Phone</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="e.g. 9849001999" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="e.g. meera@example.com" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="FEMALE">Female</option>
+                                <option value="MALE">Male</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Age</label>
+                            <input type="number" name="age" class="form-control" value="28" min="1" max="120" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

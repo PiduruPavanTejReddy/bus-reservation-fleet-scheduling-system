@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Passenger History &bull; {{ passenger.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('passengers') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Directory</a>
+            <h3 class="fw-bold mb-0">Booking History: {{ passenger.name }}</h3>
+        </div>
+        <p class="text-muted small mb-0 mt-1">Audit log derived directly from <code>passenger_booking_history</code> database view.</p>
+    </div>
+</div>
+
+<!-- Passenger Profile Card -->
+<div class="custom-card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-3">
+                <small class="text-muted text-uppercase fw-bold">Passenger Name</small>
+                <div class="fs-5 fw-bold text-primary">{{ passenger.name }}</div>
+            </div>
+            <div class="col-md-3">
+                <small class="text-muted text-uppercase fw-bold">Mobile Phone</small>
+                <div class="fs-6 fw-semibold">{{ passenger.phone }}</div>
+            </div>
+            <div class="col-md-3">
+                <small class="text-muted text-uppercase fw-bold">Email Address</small>
+                <div class="fs-6"><code>{{ passenger.email }}</code></div>
+            </div>
+            <div class="col-md-3">
+                <small class="text-muted text-uppercase fw-bold">Demographics</small>
+                <div class="fs-6 fw-semibold">{{ passenger.gender }}, {{ passenger.age }} years</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="custom-card">
+    <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history text-primary"></i>
+            <span>Travel Ledger & Reservations ({{ history|length }} Records)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>Booking Ref</th>
+                        <th>Booked On</th>
+                        <th>Route & Trip</th>
+                        <th>Bus</th>
+                        <th>Seat</th>
+                        <th>Amount</th>
+                        <th>Payment Status</th>
+                        <th>Booking Status</th>
+                        <th class="text-end">Ticket</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in history %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('booking_ticket', booking_id=h.booking_id) }}" class="fw-bold text-primary text-decoration-none">
+                                {{ h.booking_reference }}
+                            </a>
+                        </td>
+                        <td>{{ h.booking_time.strftime('%d %b, %Y') }}</td>
+                        <td>
+                            <div class="fw-semibold">{{ h.route_name }}</div>
+                            <small class="text-muted">Dep: {{ h.departure_time.strftime('%d %b %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ h.bus_number }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ h.seat_number }}</span>
+                            <small class="text-muted ms-1">{{ h.deck }}</small>
+                        </td>
+                        <td class="fw-semibold">₹{{ "{:,.2f}".format(h.total_amount) }}</td>
+                        <td>
+                            <span class="badge-status badge-{{ h.payment_status.lower() }}">{{ h.payment_status }}</span>
+                            <div class="small text-muted">{{ h.payment_method }}</div>
+                        </td>
+                        <td>
+                            <span class="badge-status badge-{{ h.booking_status.lower() }}">{{ h.booking_status }}</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('booking_ticket', booking_id=h.booking_id) }}" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                <i class="bi bi-printer me-1"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">No booking records found for this passenger.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

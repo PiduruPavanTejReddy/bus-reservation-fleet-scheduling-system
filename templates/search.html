@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Search & Book Trips &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h3 class="fw-bold mb-1">Search Trip Availability</h3>
+    <p class="text-muted small mb-0">Live query over routes, buses, and available seat inventory using multi-table relational joins.</p>
+</div>
+
+<!-- Search Query Form Card -->
+<div class="custom-card mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('search') }}" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Origin / Source</label>
+                <input type="text" name="source" class="form-control" list="sourceCities" placeholder="e.g. Hyderabad" value="{{ selected_source }}">
+                <datalist id="sourceCities">
+                    {% for c in cities %}
+                    <option value="{{ c.city }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold"><i class="bi bi-geo-fill text-success me-1"></i>Destination</label>
+                <input type="text" name="destination" class="form-control" list="destCities" placeholder="e.g. Bengaluru" value="{{ selected_destination }}">
+                <datalist id="destCities">
+                    {% for c in cities %}
+                    <option value="{{ c.city }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold"><i class="bi bi-calendar3 text-primary me-1"></i>Travel Date</label>
+                <input type="date" name="travel_date" class="form-control" value="{{ selected_date }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="bi bi-search me-1"></i> Find Available Trips
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Search Results -->
+{% if trips is defined and trips|length > 0 %}
+<div class="custom-card">
+    <div class="card-header bg-white">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-bus-front text-primary"></i>
+            <span class="fw-bold">Available Departures ({{ trips|length }} Trips Found)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>Trip</th>
+                        <th>Route Details</th>
+                        <th>Bus Specifications</th>
+                        <th>Departure & Arrival</th>
+                        <th>Fare</th>
+                        <th>Seat Availability</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in trips %}
+                    <tr>
+                        <td class="fw-bold">#{{ t.trip_id }}</td>
+                        <td>
+                            <div class="fw-bold text-primary">{{ t.route_name }}</div>
+                            <small class="text-muted">{{ t.source }} &rarr; {{ t.destination }} ({{ t.distance_km }} km)</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ t.bus_number }}</span>
+                            <div class="small text-muted">{{ t.bus_type }}</div>
+                        </td>
+                        <td>
+                            <div><strong>Dep:</strong> {{ t.departure_time.strftime('%d %b %Y, %I:%M %p') }}</div>
+                            <small class="text-muted"><strong>Arr:</strong> {{ t.arrival_time.strftime('%d %b %Y, %I:%M %p') }}</small>
+                        </td>
+                        <td>
+                            <span class="fs-5 fw-bold text-success">₹{{ "{:,.2f}".format(t.fare or 0.0) }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success px-2 py-1 fs-6">
+                                {{ t.available_seats }} / {{ t.total_seats }} Available
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('book_seat_page', trip_id=t.trip_id) }}" class="btn btn-primary btn-sm px-3 fw-semibold">
+                                <i class="bi bi-grid-3x3-gap-fill me-1"></i> Select Seats
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% elif selected_source or selected_destination or selected_date %}
+<div class="custom-card text-center py-5">
+    <i class="bi bi-info-circle display-4 text-muted mb-3 d-inline-block"></i>
+    <h5>No published trips matched your search criteria.</h5>
+    <p class="text-muted">Try clearing the date filter or searching for another source / destination city.</p>
+</div>
+{% else %}
+<!-- Default Quick Available Trips -->
+<div class="custom-card">
+    <div class="card-header bg-white">
+        <span class="fw-bold"><i class="bi bi-stars text-warning me-2"></i>Select Any Upcoming Service to Reserve Seats</span>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small">Choose your travel route from the search bar above or pick directly from the latest departures.</p>
+        <div class="alert alert-light border">
+            <strong>Sample Hubs:</strong> Hyderabad, Vijayawada, Bengaluru, Chennai, Tirupati, Nellore.
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

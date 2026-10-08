@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Boarding Pass &bull; {{ ticket.booking_reference }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('bookings') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Bookings</a>
+            <h3 class="fw-bold mb-0">E-Ticket / Boarding Voucher</h3>
+        </div>
+        <p class="text-muted small mb-0 mt-1">Official proof of reservation generated from transactional MySQL ledger.</p>
+    </div>
+    <div>
+        <button onclick="window.print()" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-printer-fill me-1"></i> Print Ticket
+        </button>
+    </div>
+</div>
+
+<!-- Ticket Container -->
+<div class="ticket-card">
+    <div class="ticket-header d-flex justify-content-between align-items-center">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-bus-front-fill fs-3 text-warning"></i>
+                <h4 class="fw-bold mb-0">FLEET TRANSIT EXPRESS</h4>
+            </div>
+            <div class="text-white-50 small">Interstate Passenger Transport System &bull; DBMS Project</div>
+        </div>
+        <div class="text-end">
+            <div class="badge bg-warning text-dark fs-6 px-3 py-2 fw-bold">
+                {{ ticket.booking_reference }}
+            </div>
+            <div class="text-white-50 small mt-1">Status: <strong>{{ ticket.booking_status }}</strong></div>
+        </div>
+    </div>
+
+    <div class="ticket-body">
+        <!-- Passenger & Route Overview -->
+        <div class="row g-4 mb-3">
+            <div class="col-md-6 border-end">
+                <div class="small text-muted text-uppercase fw-bold mb-1">Passenger Information</div>
+                <h5 class="fw-bold text-primary mb-1">{{ ticket.passenger_name }}</h5>
+                <div class="text-muted small">
+                    <div><i class="bi bi-telephone me-1"></i> {{ ticket.passenger_phone }}</div>
+                    <div><i class="bi bi-envelope me-1"></i> {{ ticket.passenger_email }}</div>
+                    <div><i class="bi bi-person me-1"></i> {{ ticket.gender }}, {{ ticket.age }} Years</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="small text-muted text-uppercase fw-bold mb-1">Journey Overview</div>
+                <h5 class="fw-bold text-dark mb-1">{{ ticket.route_name }}</h5>
+                <div class="d-flex align-items-center gap-2 text-muted fw-semibold">
+                    <span>{{ ticket.source }}</span>
+                    <i class="bi bi-arrow-right text-primary"></i>
+                    <span>{{ ticket.destination }}</span>
+                </div>
+                <small class="text-muted">Distance: {{ ticket.distance_km }} km</small>
+            </div>
+        </div>
+
+        <div class="ticket-divider"></div>
+
+        <!-- Schedule & Seat Allocation -->
+        <div class="row g-3 text-center mb-3">
+            <div class="col-md-3 border-end">
+                <div class="small text-muted text-uppercase fw-bold">Departure</div>
+                <div class="fs-6 fw-bold text-dark mt-1">{{ ticket.departure_time.strftime('%d %b %Y') }}</div>
+                <div class="text-primary fw-bold">{{ ticket.departure_time.strftime('%I:%M %p') }}</div>
+            </div>
+            <div class="col-md-3 border-end">
+                <div class="small text-muted text-uppercase fw-bold">Estimated Arrival</div>
+                <div class="fs-6 fw-bold text-dark mt-1">{{ ticket.arrival_time.strftime('%d %b %Y') }}</div>
+                <div class="text-muted">{{ ticket.arrival_time.strftime('%I:%M %p') }}</div>
+            </div>
+            <div class="col-md-3 border-end">
+                <div class="small text-muted text-uppercase fw-bold">Assigned Bus</div>
+                <div class="fs-6 fw-bold text-dark mt-1">{{ ticket.bus_number }}</div>
+                <small class="text-muted">{{ ticket.bus_type }}</small>
+            </div>
+            <div class="col-md-3">
+                <div class="small text-muted text-uppercase fw-bold">Confirmed Seat</div>
+                <div class="display-6 fw-bold text-primary">{{ ticket.seat_number }}</div>
+                <small class="text-muted">{{ ticket.deck }} Deck &bull; {{ ticket.seat_type }}</small>
+            </div>
+        </div>
+
+        <div class="ticket-divider"></div>
+
+        <!-- Payment Settlement -->
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="small text-muted text-uppercase fw-bold">Payment Instrument</div>
+                <div class="fw-semibold">{{ ticket.payment_method }} &bull; TXN: <code>{{ ticket.transaction_reference }}</code></div>
+                <div class="small text-muted">Settlement: <span class="badge-status badge-{{ ticket.payment_status.lower() }}">{{ ticket.payment_status }}</span></div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="small text-muted text-uppercase fw-bold">Fare Paid</div>
+                <div class="fs-3 fw-bold text-success">₹{{ "{:,.2f}".format(ticket.total_amount) }}</div>
+            </div>
+        </div>
+
+        <!-- Cancellation Note if Cancelled -->
+        {% if ticket.booking_status == 'CANCELLED' %}
+        <div class="alert alert-danger mt-4 mb-0">
+            <div class="d-flex align-items-center gap-2 fw-bold">
+                <i class="bi bi-x-circle-fill"></i> BOOKING CANCELLED
+            </div>
+            <div class="small mt-1">
+                Cancelled on: {{ ticket.cancellation_time.strftime('%d %b %Y, %I:%M %p') }} &bull; Reason: {{ ticket.reason }}
+            </div>
+            <div class="fw-bold mt-1 text-danger">
+                Refund Disbursed: ₹{{ "{:,.2f}".format(ticket.refund_amount) }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

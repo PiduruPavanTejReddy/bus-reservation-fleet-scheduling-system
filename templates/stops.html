@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Stops & Stations &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Boarding & Dropping Points</h3>
+        <p class="text-muted small mb-0">Master catalog of bus stations, terminals, and highway pickup hubs (3NF Master Entity).</p>
+    </div>
+    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#addStopModal">
+        <i class="bi bi-plus-lg me-1"></i> Add New Stop
+    </button>
+</div>
+
+<div class="custom-card">
+    <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt text-primary"></i>
+            <span>Master Stops Directory ({{ stops|length }} Stops)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Stop / Terminal Name</th>
+                        <th>City / District</th>
+                        <th>Landmark / Platform Details</th>
+                        <th class="text-center">Routes Serving</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in stops %}
+                    <tr>
+                        <td class="fw-bold text-muted">#{{ s.stop_id }}</td>
+                        <td class="fw-bold text-primary">{{ s.stop_name }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ s.city }}</span></td>
+                        <td><small class="text-muted">{{ s.location_landmark or 'N/A' }}</small></td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary-subtle text-dark">{{ s.routes_count }} Routes</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No stops registered in system.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Stop Modal -->
+<div class="modal fade" id="addStopModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('add_stop') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Register New Stop Point</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Stop Name</label>
+                        <input type="text" name="stop_name" class="form-control" placeholder="e.g. Miyapur Cross Roads" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">City</label>
+                        <input type="text" name="city" class="form-control" placeholder="e.g. Hyderabad" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Landmark / Specific Location</label>
+                        <input type="text" name="location_landmark" class="form-control" placeholder="e.g. Metro Pillar A102, Near Bus Shelter">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Stop</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

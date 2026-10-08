@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Routes Management &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Transit Routes Catalog</h3>
+        <p class="text-muted small mb-0">Arterial travel paths with origin, destination, distance, and intermediate stops assignment (3NF).</p>
+    </div>
+    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#addRouteModal">
+        <i class="bi bi-plus-lg me-1"></i> Add New Route
+    </button>
+</div>
+
+<div class="custom-card">
+    <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-signpost-split text-primary"></i>
+            <span>Network Routes ({{ routes|length }} Routes)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Route Name</th>
+                        <th>Origin (Source)</th>
+                        <th>Destination</th>
+                        <th>Distance (KM)</th>
+                        <th>Est. Duration</th>
+                        <th class="text-center">Assigned Stops</th>
+                        <th class="text-center">Trips Handled</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in routes %}
+                    <tr>
+                        <td class="fw-bold text-muted">#{{ r.route_id }}</td>
+                        <td class="fw-bold text-primary">{{ r.route_name }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ r.source }}</span></td>
+                        <td><span class="badge bg-light text-dark border">{{ r.destination }}</span></td>
+                        <td class="fw-semibold">{{ r.distance_km }} km</td>
+                        <td>{{ r.estimated_duration_hours }} hrs</td>
+                        <td class="text-center">
+                            <a href="{{ url_for('route_stops', route_id=r.route_id) }}" class="badge bg-info-subtle text-info-emphasis border text-decoration-none">
+                                {{ r.stops_count }} Stops &rarr;
+                            </a>
+                        </td>
+                        <td class="text-center">{{ r.trips_count }}</td>
+                        <td class="text-end">
+                            <a href="{{ url_for('route_stops', route_id=r.route_id) }}" class="btn btn-sm btn-outline-primary py-0 px-2" title="Manage Waypoints / Stops">
+                                <i class="bi bi-geo-alt me-1"></i> Waypoints
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">No routes created yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Route Modal -->
+<div class="modal fade" id="addRouteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('add_route') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Create New Network Route</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Route Name</label>
+                        <input type="text" name="route_name" class="form-control" placeholder="e.g. Hyderabad to Vijayawada Express" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Source City</label>
+                            <input type="text" name="source" class="form-control" placeholder="e.g. Hyderabad" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Destination City</label>
+                            <input type="text" name="destination" class="form-control" placeholder="e.g. Vijayawada" required>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Distance (km)</label>
+                            <input type="number" step="0.1" name="distance_km" class="form-control" placeholder="275.0" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Est. Duration (hrs)</label>
+                            <input type="number" step="0.5" name="estimated_duration_hours" class="form-control" value="5.0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Route</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

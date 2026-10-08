@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Cancellations & Refunds &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Cancellations & Refund Audit</h3>
+        <p class="text-muted small mb-0">Audit ledger for booking revocations, computed refund percentages, and reason telemetry (from <code>cancellation_report_view</code>).</p>
+    </div>
+</div>
+
+<!-- Policy Banner -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="p-3 bg-white rounded-3 border-start border-success border-4 shadow-sm">
+            <div class="fw-bold text-success mb-1">&gt; 24 Hours Before Departure</div>
+            <div class="display-6 fw-bold text-dark">100%</div>
+            <small class="text-muted">Full refund of ticket fare</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3 bg-white rounded-3 border-start border-warning border-4 shadow-sm">
+            <div class="fw-bold text-warning mb-1">12 – 24 Hours Before Departure</div>
+            <div class="display-6 fw-bold text-dark">75%</div>
+            <small class="text-muted">25% deduction penalty</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3 bg-white rounded-3 border-start border-danger border-4 shadow-sm">
+            <div class="fw-bold text-danger mb-1">&lt; 12 Hours Before Departure</div>
+            <div class="display-6 fw-bold text-dark">50%</div>
+            <small class="text-muted">50% last-minute penalty</small>
+        </div>
+    </div>
+</div>
+
+<div class="custom-card">
+    <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-x-circle text-danger"></i>
+            <span>Cancellation Audit Records ({{ cancellations|length }} Records)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Booking Ref</th>
+                        <th>Passenger</th>
+                        <th>Route</th>
+                        <th>Trip Departure</th>
+                        <th>Cancelled On</th>
+                        <th>Original Fare</th>
+                        <th>Refund Pct</th>
+                        <th>Refund Disbursed</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cancellations %}
+                    <tr>
+                        <td class="fw-bold text-muted">#{{ c.cancellation_id }}</td>
+                        <td>
+                            <span class="fw-bold text-danger">{{ c.booking_reference }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ c.passenger_name }}</div>
+                            <small class="text-muted">{{ c.passenger_phone }}</small>
+                        </td>
+                        <td>{{ c.route_name }}</td>
+                        <td>{{ c.departure_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+                        <td>{{ c.cancellation_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+                        <td class="fw-semibold">₹{{ "{:,.2f}".format(c.original_fare) }}</td>
+                        <td><span class="badge bg-warning-subtle text-warning-emphasis border">{{ c.refund_percentage }}%</span></td>
+                        <td class="fw-bold text-danger">₹{{ "{:,.2f}".format(c.refund_amount) }}</td>
+                        <td class="small text-muted">{{ c.reason }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">No cancellation records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

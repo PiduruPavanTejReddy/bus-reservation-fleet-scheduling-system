@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+
+{% block title %}DBMS Analytical Reports &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">DBMS Analytical Reports Suite</h3>
+        <p class="text-muted small mb-0">Enterprise intelligence powered by compiled MySQL database views, multi-table joins, and aggregate functions (GROUP BY, HAVING, SUM, AVG).</p>
+    </div>
+</div>
+
+<!-- Tabs Navigation for 10 Reports -->
+<ul class="nav nav-pills mb-4 gap-2 bg-white p-2 rounded-3 shadow-sm border" id="reportsTab" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active btn-sm" id="tab-occupancy" data-bs-toggle="pill" data-bs-target="#content-occupancy" type="button">
+            1. Trip Occupancy
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-revenue" data-bs-toggle="pill" data-bs-target="#content-revenue" type="button">
+            2. Route Revenue
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-fleet" data-bs-toggle="pill" data-bs-target="#content-fleet" type="button">
+            3. Fleet Utilization
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-cancellations" data-bs-toggle="pill" data-bs-target="#content-cancellations" type="button">
+            4. Cancellations
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-crew" data-bs-toggle="pill" data-bs-target="#content-crew" type="button">
+            5. Crew Rosters
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-daily" data-bs-toggle="pill" data-bs-target="#content-daily" type="button">
+            6. Daily Revenue
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-popular" data-bs-toggle="pill" data-bs-target="#content-popular" type="button">
+            7. Popular Routes
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-busperf" data-bs-toggle="pill" data-bs-target="#content-busperf" type="button">
+            8. Bus Performance
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-payment" data-bs-toggle="pill" data-bs-target="#content-payment" type="button">
+            9. Payment Methods
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link btn-sm" id="tab-passengers" data-bs-toggle="pill" data-bs-target="#content-passengers" type="button">
+            10. Top Travellers
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content Container -->
+<div class="tab-content" id="reportsTabContent">
+
+    <!-- 1. Trip Occupancy Report -->
+    <div class="tab-pane fade show active" id="content-occupancy" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Trip Occupancy & Load Factor Report</h5>
+                    <small class="text-muted">Source: <code>trip_occupancy_view</code> &bull; Computes percentage load per scheduled service.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Trip</th>
+                                <th>Route</th>
+                                <th>Bus</th>
+                                <th>Departure Time</th>
+                                <th class="text-center">Total Capacity</th>
+                                <th class="text-center">Booked Seats</th>
+                                <th>Occupancy Ratio</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in occupancy_report %}
+                            <tr>
+                                <td class="fw-bold">#{{ row.trip_id }}</td>
+                                <td>{{ row.route_name }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ row.bus_number }}</span></td>
+                                <td>{{ row.departure_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+                                <td class="text-center">{{ row.total_seats }}</td>
+                                <td class="text-center fw-bold">{{ row.booked_seats }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar {% if row.occupancy_percentage >= 50 %}bg-success{% elif row.occupancy_percentage >= 25 %}bg-warning{% else %}bg-secondary{% endif %}" 
+                                                 style="width: {{ row.occupancy_percentage }}%;"></div>
+                                        </div>
+                                        <span class="fw-bold small">{{ row.occupancy_percentage }}%</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge-status badge-{{ row.trip_status.lower() }}">{{ row.trip_status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Route Revenue Report -->
+    <div class="tab-pane fade" id="content-revenue" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Route Financial Performance Report</h5>
+                    <small class="text-muted">Source: <code>route_revenue_view</code> &bull; Aggregates gross tariff collections, cancellations, and net revenue.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Route ID</th>
+                                <th>Route Name</th>
+                                <th>Distance</th>
+                                <th class="text-center">Trips Run</th>
+                                <th class="text-center">Bookings</th>
+                                <th class="text-end">Gross Revenue</th>
+                                <th class="text-end">Refunds</th>
+                                <th class="text-end">Net Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in route_revenue %}
+                            <tr>
+                                <td class="fw-bold">#{{ r.route_id }}</td>
+                                <td class="fw-semibold text-primary">{{ r.route_name }}</td>
+                                <td>{{ r.distance_km }} km</td>
+                                <td class="text-center">{{ r.total_trips }}</td>
+                                <td class="text-center">{{ r.confirmed_bookings }}</td>
+                                <td class="text-end">₹{{ "{:,.2f}".format(r.gross_revenue) }}</td>
+                                <td class="text-end text-danger">₹{{ "{:,.2f}".format(r.total_refunds) }}</td>
+                                <td class="text-end fw-bold text-success fs-6">₹{{ "{:,.2f}".format(r.net_revenue) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Fleet Utilization Report -->
+    <div class="tab-pane fade" id="content-fleet" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Bus Fleet Asset Yield & Utilization</h5>
+                    <small class="text-muted">Source: <code>fleet_utilization_view</code> &bull; Assesses vehicle deployment and passenger payload.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Bus Unit</th>
+                                <th>Registration</th>
+                                <th>Bus Type</th>
+                                <th class="text-center">Capacity</th>
+                                <th>Status</th>
+                                <th class="text-center">Trips Assigned</th>
+                                <th class="text-center">Passengers Served</th>
+                                <th class="text-end">Revenue Generated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in fleet_util %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ f.bus_number }}</td>
+                                <td><code>{{ f.registration_number }}</code></td>
+                                <td>{{ f.bus_type }}</td>
+                                <td class="text-center">{{ f.total_seats }}</td>
+                                <td><span class="badge-status badge-{{ f.bus_status.lower() }}">{{ f.bus_status }}</span></td>
+                                <td class="text-center">{{ f.total_trips_assigned }}</td>
+                                <td class="text-center fw-bold">{{ f.total_passengers_carried }}</td>
+                                <td class="text-end fw-bold text-success">₹{{ "{:,.2f}".format(f.total_revenue_generated) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Cancellation Report -->
+    <div class="tab-pane fade" id="content-cancellations" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Cancellation & Refund Analysis</h5>
+                    <small class="text-muted">Source: <code>cancellation_report_view</code> &bull; Ticket cancellation drivers and disbursements.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Ref</th>
+                                <th>Passenger</th>
+                                <th>Route</th>
+                                <th>Cancellation Date</th>
+                                <th>Original Fare</th>
+                                <th>Refund %</th>
+                                <th>Disbursed Refund</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in cancellations_report %}
+                            <tr>
+                                <td class="fw-bold text-danger">{{ c.booking_reference }}</td>
+                                <td>{{ c.passenger_name }}</td>
+                                <td>{{ c.route_name }}</td>
+                                <td>{{ c.cancellation_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+                                <td>₹{{ "{:,.2f}".format(c.original_fare) }}</td>
+                                <td><span class="badge bg-warning-subtle text-warning-emphasis border">{{ c.refund_percentage }}%</span></td>
+                                <td class="fw-bold text-danger">₹{{ "{:,.2f}".format(c.refund_amount) }}</td>
+                                <td class="small text-muted">{{ c.reason }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Crew Schedules Report -->
+    <div class="tab-pane fade" id="content-crew" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Crew Operations & Rostering</h5>
+                    <small class="text-muted">Source: <code>crew_schedule_view</code> &bull; Verified non-overlapping driver and conductor schedules.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Trip</th>
+                                <th>Route</th>
+                                <th>Bus</th>
+                                <th>Assigned Driver</th>
+                                <th>Assigned Conductor</th>
+                                <th>Departure</th>
+                                <th>Trip Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cr in crew_schedules %}
+                            <tr>
+                                <td class="fw-bold">#{{ cr.trip_id }}</td>
+                                <td>{{ cr.route_name }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ cr.bus_number }}</span></td>
+                                <td>
+                                    <div class="fw-semibold">{{ cr.driver_name }}</div>
+                                    <small class="text-muted">{{ cr.license_number }}</small>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">{{ cr.conductor_name }}</div>
+                                    <small class="text-muted">{{ cr.employee_code }}</small>
+                                </td>
+                                <td>{{ cr.departure_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+                                <td><span class="badge-status badge-{{ cr.trip_status.lower() }}">{{ cr.trip_status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Daily Revenue Trend -->
+    <div class="tab-pane fade" id="content-daily" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Daily Revenue Summary</h5>
+                    <small class="text-muted">Aggregated by <code>DATE(payment_time)</code> with gross, refund, and net calculations.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Settlement Date</th>
+                                <th class="text-center">Total Txns</th>
+                                <th class="text-end">Gross Collections</th>
+                                <th class="text-end">Refunds Processed</th>
+                                <th class="text-end">Net Daily Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in daily_revenue %}
+                            <tr>
+                                <td class="fw-bold">{{ d.payment_date.strftime('%d %B %Y') }}</td>
+                                <td class="text-center"><span class="badge bg-secondary-subtle text-dark">{{ d.transactions_count }}</span></td>
+                                <td class="text-end">₹{{ "{:,.2f}".format(d.gross_daily) }}</td>
+                                <td class="text-end text-danger">₹{{ "{:,.2f}".format(d.refunds_daily) }}</td>
+                                <td class="text-end fw-bold text-success fs-6">₹{{ "{:,.2f}".format(d.net_daily) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Most Popular Routes -->
+    <div class="tab-pane fade" id="content-popular" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Most Popular Routes by Passenger Volume</h5>
+                    <small class="text-muted">Ranked by confirmed seat reservation counts.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Route Name</th>
+                                <th>Origin & Destination</th>
+                                <th class="text-center">Confirmed Passengers</th>
+                                <th class="text-end">Revenue Yield</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pr in popular_routes %}
+                            <tr>
+                                <td class="fw-bold text-muted">#{{ loop.index }}</td>
+                                <td class="fw-semibold text-primary">{{ pr.route_name }}</td>
+                                <td>{{ pr.source }} &rarr; {{ pr.destination }}</td>
+                                <td class="text-center fw-bold fs-6">
+                                    <span class="badge bg-primary px-3 py-1">{{ pr.total_passengers }} Seats</span>
+                                </td>
+                                <td class="text-end fw-bold text-success">₹{{ "{:,.2f}".format(pr.total_revenue) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Bus Performance & Yield -->
+    <div class="tab-pane fade" id="content-busperf" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Bus Fleet Performance & Load Factors</h5>
+                    <small class="text-muted">Individual asset load factor and passenger revenue contribution.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Bus Unit</th>
+                                <th>Bus Type</th>
+                                <th class="text-center">Capacity</th>
+                                <th class="text-center">Trips Run</th>
+                                <th class="text-center">Total Bookings</th>
+                                <th>Overall Load Factor</th>
+                                <th class="text-end">Total Yield</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bp in bus_performance %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ bp.bus_number }}</td>
+                                <td>{{ bp.bus_type }}</td>
+                                <td class="text-center">{{ bp.total_seats }}</td>
+                                <td class="text-center">{{ bp.total_trips }}</td>
+                                <td class="text-center">{{ bp.total_bookings }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                            <div class="progress-bar bg-info" style="width: {{ bp.load_factor or 0 }}%;"></div>
+                                        </div>
+                                        <span class="small fw-semibold">{{ bp.load_factor or 0 }}%</span>
+                                    </div>
+                                </td>
+                                <td class="text-end fw-bold text-success">₹{{ "{:,.2f}".format(bp.revenue or 0) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. Payment Methods Breakdown -->
+    <div class="tab-pane fade" id="content-payment" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Payment Instrument Channel Breakdown</h5>
+                    <small class="text-muted">Aggregated financial settlements categorized by payment method.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Payment Method</th>
+                                <th class="text-center">Successful Transactions</th>
+                                <th class="text-end">Total Amount Processed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pm in payment_methods %}
+                            <tr>
+                                <td class="fw-bold">
+                                    <i class="bi bi-wallet2 me-2 text-primary"></i> {{ pm.payment_method }}
+                                </td>
+                                <td class="text-center fw-semibold">{{ pm.transactions }}</td>
+                                <td class="text-end fw-bold text-success fs-6">₹{{ "{:,.2f}".format(pm.total_collected) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. Top Frequent Travellers -->
+    <div class="tab-pane fade" id="content-passengers" role="tabpanel">
+        <div class="custom-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Top Frequent Travellers</h5>
+                    <small class="text-muted">Customer lifetime value and repeat bookings analysis.</small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Passenger Name</th>
+                                <th>Contact Information</th>
+                                <th class="text-center">Trips Booked</th>
+                                <th class="text-end">Total Spend</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tp in top_passengers %}
+                            <tr>
+                                <td class="fw-bold text-muted">#{{ loop.index }}</td>
+                                <td class="fw-semibold text-primary">{{ tp.name }}</td>
+                                <td>
+                                    <div>{{ tp.phone }}</div>
+                                    <small class="text-muted">{{ tp.email }}</small>
+                                </td>
+                                <td class="text-center fw-bold">
+                                    <span class="badge bg-success-subtle text-success-emphasis border border-success">{{ tp.trips_booked }} Journeys</span>
+                                </td>
+                                <td class="text-end fw-bold text-dark fs-6">₹{{ "{:,.2f}".format(tp.total_spend) }}</td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('passenger_history', passenger_id=tp.passenger_id) }}" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                        History
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

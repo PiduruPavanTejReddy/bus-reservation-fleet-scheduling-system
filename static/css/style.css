@@ -1,0 +1,404 @@
+/* ==========================================================================
+   BUS RESERVATION AND FLEET SCHEDULING SYSTEM
+   Modern Responsive CSS Stylesheet
+   ========================================================================== */
+
+:root {
+    --primary-blue: #0d47a1;
+    --primary-light: #1976d2;
+    --primary-dark: #002171;
+    --accent-orange: #f57c00;
+    --accent-green: #2e7d32;
+    --accent-red: #c62828;
+    --bg-light: #f4f6f9;
+    --card-bg: #ffffff;
+    --text-dark: #212529;
+    --text-muted: #6c757d;
+    --border-color: #e0e0e0;
+    --sidebar-width: 260px;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+#sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
+    color: #ffffff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+#sidebar .sidebar-header {
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+#sidebar .sidebar-brand {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+#sidebar ul.nav-links {
+    list-style: none;
+    padding: 0.75rem 0;
+    margin: 0;
+}
+
+#sidebar ul.nav-links li a {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1.25rem;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+#sidebar ul.nav-links li a:hover,
+#sidebar ul.nav-links li a.active {
+    color: #ffffff;
+    background: rgba(255,255,255,0.12);
+    border-left-color: #ffb300;
+}
+
+#sidebar ul.nav-links li a i {
+    width: 20px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+/* Main Content Area */
+#content {
+    margin-left: var(--sidebar-width);
+    padding: 1.5rem 2rem;
+    min-height: 100vh;
+}
+
+/* Top Navbar */
+.top-navbar {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 0.85rem 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    margin-bottom: 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Metric KPI Cards */
+.kpi-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+.kpi-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.kpi-icon.blue { background-color: #e3f2fd; color: #1976d2; }
+.kpi-icon.green { background-color: #e8f5e9; color: #2e7d32; }
+.kpi-icon.orange { background-color: #fff3e0; color: #ef6c00; }
+.kpi-icon.purple { background-color: #f3e5f5; color: #7b1fa2; }
+.kpi-icon.teal { background-color: #e0f2f1; color: #00796b; }
+.kpi-icon.red { background-color: #ffebee; color: #c62828; }
+
+.kpi-value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-top: 0.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.kpi-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+/* Card Styling */
+.custom-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 1.75rem;
+}
+
+.custom-card .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.15rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.05rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Badges */
+.badge-status {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    letter-spacing: 0.4px;
+}
+
+.badge-active, .badge-confirmed, .badge-paid {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-scheduled, .badge-published {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.badge-completed {
+    background-color: #ede7f6;
+    color: #512da8;
+}
+
+.badge-cancelled, .badge-refunded, .badge-failed {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.badge-maintenance, .badge-pending, .badge-on_leave {
+    background-color: #fff8e1;
+    color: #f57f17;
+}
+
+/* Data Tables */
+.table-custom {
+    margin-bottom: 0;
+}
+
+.table-custom th {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #495057;
+    background-color: #f8f9fa;
+    border-top: none;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.85rem 1rem;
+}
+
+.table-custom td {
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+    font-size: 0.92rem;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.table-custom tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Interactive Seat Layout Styles */
+.seat-bus-container {
+    background: #ffffff;
+    border: 2px solid #cfd8dc;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 580px;
+    margin: 0 auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    position: relative;
+}
+
+.bus-front-header {
+    background: #eceff1;
+    border-radius: 10px;
+    padding: 0.6rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #546e7a;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.seat-item {
+    aspect-ratio: 1.2;
+    border: 2px solid #81c784;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    position: relative;
+}
+
+.seat-item:hover:not(.seat-booked) {
+    background-color: #c8e6c9;
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(46, 125, 50, 0.25);
+}
+
+.seat-item.seat-selected {
+    background-color: #1976d2 !important;
+    border-color: #0d47a1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.35);
+}
+
+.seat-item.seat-booked {
+    background-color: #ffcdd2;
+    border-color: #e57373;
+    color: #b71c1c;
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+.seat-item .seat-type-tag {
+    font-size: 0.6rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.seat-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.legend-box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    margin-right: 6px;
+    vertical-align: text-bottom;
+}
+
+.legend-box.available { background-color: #e8f5e9; border: 2px solid #81c784; }
+.legend-box.selected { background-color: #1976d2; border: 2px solid #0d47a1; }
+.legend-box.booked { background-color: #ffcdd2; border: 2px solid #e57373; }
+
+/* Boarding Ticket */
+.ticket-card {
+    max-width: 750px;
+    margin: 2rem auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.ticket-header {
+    background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+    color: #ffffff;
+    padding: 1.75rem 2rem;
+}
+
+.ticket-body {
+    padding: 2rem;
+}
+
+.ticket-divider {
+    border-top: 2px dashed #cbd5e1;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+/* SQL Demonstration Block */
+.sql-card {
+    border-left: 5px solid #1976d2;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.sql-code-box {
+    background-color: #212529;
+    color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.88rem;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+}
+
+/* Responsive adjustment */
+@media (max-width: 992px) {
+    #sidebar {
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+    #sidebar.show {
+        margin-left: 0;
+    }
+    #content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+}

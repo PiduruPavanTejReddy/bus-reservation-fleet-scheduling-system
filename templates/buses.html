@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Bus Fleet Management &bull; DBMS Project{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Bus Fleet Assets</h3>
+        <p class="text-muted small mb-0">Entity representation of physical bus units with automatic seat configuration (3NF Master Table).</p>
+    </div>
+    <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#addBusModal">
+        <i class="bi bi-plus-lg me-1"></i> Add New Bus
+    </button>
+</div>
+
+<div class="custom-card">
+    <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-truck-front text-primary"></i>
+            <span>Fleet Inventory List ({{ buses|length }} Buses)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fleet Unit</th>
+                        <th>Registration No</th>
+                        <th>Bus Type</th>
+                        <th class="text-center">Total Seats</th>
+                        <th class="text-center">Trips Handled</th>
+                        <th>Operational Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in buses %}
+                    <tr>
+                        <td class="fw-bold text-muted">#{{ b.bus_id }}</td>
+                        <td class="fw-bold text-primary">{{ b.bus_number }}</td>
+                        <td><code>{{ b.registration_number }}</code></td>
+                        <td>{{ b.bus_type }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary">{{ b.total_seats }} Seats</span>
+                        </td>
+                        <td class="text-center">{{ b.trips_count }}</td>
+                        <td>
+                            <span class="badge-status badge-{{ b.status.lower() }}">{{ b.status }}</span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editBusModal{{ b.bus_id }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <form method="POST" action="{{ url_for('delete_bus', bus_id=b.bus_id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete or deactivate bus {{ b.bus_number }}?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Edit Bus Modal -->
+                    <div class="modal fade" id="editBusModal{{ b.bus_id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="POST" action="{{ url_for('edit_bus', bus_id=b.bus_id) }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Edit Bus #{{ b.bus_number }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Registration Number</label>
+                                            <input type="text" class="form-control" value="{{ b.registration_number }}" disabled>
+                                            <small class="text-muted">Unique natural key cannot be edited.</small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Bus Type</label>
+                                            <select name="bus_type" class="form-select" required>
+                                                <option value="Volvo Multi-Axle" {% if b.bus_type == 'Volvo Multi-Axle' %}selected{% endif %}>Volvo Multi-Axle</option>
+                                                <option value="AC Sleeper" {% if b.bus_type == 'AC Sleeper' %}selected{% endif %}>AC Sleeper</option>
+                                                <option value="AC Seater" {% if b.bus_type == 'AC Seater' %}selected{% endif %}>AC Seater</option>
+                                                <option value="Non-AC Seater" {% if b.bus_type == 'Non-AC Seater' %}selected{% endif %}>Non-AC Seater</option>
+                                                <option value="Electric AC" {% if b.bus_type == 'Electric AC' %}selected{% endif %}>Electric AC</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Operational Status</label>
+                                            <select name="status" class="form-select" required>
+                                                <option value="ACTIVE" {% if b.status == 'ACTIVE' %}selected{% endif %}>ACTIVE</option>
+                                                <option value="MAINTENANCE" {% if b.status == 'MAINTENANCE' %}selected{% endif %}>MAINTENANCE</option>
+                                                <option value="INACTIVE" {% if b.status == 'INACTIVE' %}selected{% endif %}>INACTIVE</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No buses currently enrolled in fleet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Bus Modal -->
+<div class="modal fade" id="addBusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('add_bus') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Register New Bus to Fleet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Registration Number (RTA)</label>
+                        <input type="text" name="registration_number" class="form-control" placeholder="e.g. TS09UB4521" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Bus Fleet Number</label>
+                        <input type="text" name="bus_number" class="form-control" placeholder="e.g. BUS-115" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Bus Type</label>
+                        <select name="bus_type" class="form-select" required>
+                            <option value="Volvo Multi-Axle">Volvo Multi-Axle</option>
+                            <option value="AC Sleeper">AC Sleeper</option>
+                            <option value="AC Seater">AC Seater</option>
+                            <option value="Non-AC Seater">Non-AC Seater</option>
+                            <option value="Electric AC">Electric AC</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Total Seat Capacity</label>
+                        <input type="number" name="total_seats" class="form-control" min="10" max="60" value="40" required>
+                        <small class="text-muted">Seats will be automatically generated with unique numbers.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="ACTIVE" selected>ACTIVE</option>
+                            <option value="MAINTENANCE">MAINTENANCE</option>
+                            <option value="INACTIVE">INACTIVE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create Bus & Populate Seats</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

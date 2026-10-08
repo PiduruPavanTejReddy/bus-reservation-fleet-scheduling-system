@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Route Waypoints &bull; {{ route.route_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('routes') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Routes</a>
+            <h3 class="fw-bold mb-0">Waypoints: {{ route.route_name }}</h3>
+        </div>
+        <p class="text-muted small mb-0 mt-1">M:N Junction Table <code>route_stops</code> with stop order and chronological arrival offsets.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Existing Assigned Stops -->
+    <div class="col-lg-8">
+        <div class="custom-card">
+            <div class="card-header">
+                <span class="d-flex align-items-center gap-2">
+                    <i class="bi bi-list-ol text-primary"></i>
+                    <span>Sequential Stops Sequence ({{ assigned_stops|length }} Stops)</span>
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 70px;">Order</th>
+                                <th>Stop Name</th>
+                                <th>City</th>
+                                <th>Arrival Offset</th>
+                                <th>Departure Offset</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in assigned_stops %}
+                            <tr>
+                                <td class="text-center fw-bold fs-6">
+                                    <span class="badge bg-primary rounded-circle p-2" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+                                        {{ s.stop_order }}
+                                    </span>
+                                </td>
+                                <td class="fw-semibold">
+                                    {{ s.stop_name }}
+                                    {% if s.location_landmark %}
+                                    <div class="small text-muted">{{ s.location_landmark }}</div>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ s.city }}</span></td>
+                                <td>+{{ s.arrival_offset_mins }} mins</td>
+                                <td>+{{ s.departure_offset_mins }} mins</td>
+                                <td class="text-end">
+                                    <form method="POST" action="{{ url_for('delete_route_stop', route_id=route.route_id, stop_id=s.stop_id) }}" class="d-inline" onsubmit="return confirm('Remove stop from route?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">No intermediate stops linked to this route yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link Stop Form -->
+    <div class="col-lg-4">
+        <div class="custom-card">
+            <div class="card-header">
+                <span class="d-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle text-primary"></i>
+                    <span>Link Stop to Route</span>
+                </span>
+            </div>
+            <div class="card-body">
+                {% if available_stops %}
+                <form method="POST" action="{{ url_for('route_stops', route_id=route.route_id) }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Master Stop</label>
+                        <select name="stop_id" class="form-select" required>
+                            <option value="">-- Choose Stop --</option>
+                            {% for st in available_stops %}
+                            <option value="{{ st.stop_id }}">{{ st.stop_name }} ({{ st.city }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Sequence / Stop Order</label>
+                        <input type="number" name="stop_order" class="form-control" value="{{ (assigned_stops|length) + 1 }}" min="1" required>
+                        <small class="text-muted">Chronological order along the route.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Arrival Offset (minutes)</label>
+                        <input type="number" name="arrival_offset_mins" class="form-control" value="0" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Departure Offset (minutes)</label>
+                        <input type="number" name="departure_offset_mins" class="form-control" value="15" min="0" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-link-45deg me-1"></i> Attach to Route
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    All available stops are already linked to this route.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

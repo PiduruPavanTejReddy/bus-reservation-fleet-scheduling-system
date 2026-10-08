@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bus Reservation & Fleet Scheduling System{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom Application Styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('dashboard') }}" class="sidebar-brand">
+                <i class="bi bi-bus-front-fill text-warning fs-3"></i>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 700; line-height: 1.2;">FLEET TRANSIT</div>
+                    <small style="font-size: 0.65rem; color: rgba(255,255,255,0.7); font-weight: 400; letter-spacing: 0.8px;">DBMS ACADEMIC SYSTEM</small>
+                </div>
+            </a>
+        </div>
+
+        <ul class="nav-links">
+            <li>
+                <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('buses') }}" class="{% if request.endpoint == 'buses' %}active{% endif %}">
+                    <i class="bi bi-truck-front"></i> <span>Buses</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('routes') }}" class="{% if request.endpoint in ('routes', 'route_stops') %}active{% endif %}">
+                    <i class="bi bi-signpost-split"></i> <span>Routes</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('stops') }}" class="{% if request.endpoint == 'stops' %}active{% endif %}">
+                    <i class="bi bi-geo-alt"></i> <span>Stops</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('trips') }}" class="{% if request.endpoint == 'trips' %}active{% endif %}">
+                    <i class="bi bi-calendar-check"></i> <span>Trips & Schedules</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('crew') }}" class="{% if request.endpoint == 'crew' %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i> <span>Crew Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('passengers') }}" class="{% if request.endpoint in ('passengers', 'passenger_history') %}active{% endif %}">
+                    <i class="bi bi-person-badge"></i> <span>Passengers</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('bookings') }}" class="{% if request.endpoint == 'bookings' %}active{% endif %}">
+                    <i class="bi bi-ticket-perforated"></i> <span>Bookings</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('cancellations') }}" class="{% if request.endpoint == 'cancellations' %}active{% endif %}">
+                    <i class="bi bi-x-circle"></i> <span>Cancellations</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('payments') }}" class="{% if request.endpoint == 'payments' %}active{% endif %}">
+                    <i class="bi bi-credit-card"></i> <span>Payments Ledger</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('reports') }}" class="{% if request.endpoint == 'reports' %}active{% endif %}">
+                    <i class="bi bi-bar-chart-line-fill"></i> <span>DBMS Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('search') }}" class="{% if request.endpoint in ('search', 'book_seat_page') %}active{% endif %}">
+                    <i class="bi bi-search"></i> <span>Book Seat</span>
+                </a>
+            </li>
+            <li class="mt-2 pt-2 border-top border-secondary border-opacity-25">
+                <a href="{{ url_for('sql_demo') }}" class="{% if request.endpoint == 'sql_demo' %}active{% endif %}" style="color: #ffd54f;">
+                    <i class="bi bi-code-slash text-warning"></i> <span class="fw-bold">SQL Viva Demo</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('logout') }}" class="text-danger-emphasis">
+                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="content">
+        <!-- Top Navbar -->
+        <header class="top-navbar">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6">
+                    <i class="bi bi-database me-1"></i> MySQL 8.0 Engine &bull; 3NF Relational Schema
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ url_for('search') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    <i class="bi bi-plus-circle me-1"></i> New Reservation
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 border" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-5 text-primary"></i>
+                        <span class="fw-semibold">{{ session.get('full_name', 'Administrator') }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><h6 class="dropdown-header">Role: {{ session.get('role', 'ADMIN') }}</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('sql_demo') }}"><i class="bi bi-code-square me-2"></i>SQL Demonstration</a></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        <div class="flash-messages-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                            {% elif category == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% elif category == 'warning' %}
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                            {% endif %}
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Page Specific Body -->
+        {% block content %}{% endblock %}
+
+        <!-- Footer -->
+        <footer class="mt-5 py-4 text-center text-muted border-top">
+            <small>
+                <strong>Bus Reservation & Fleet Scheduling System</strong> &bull; DBMS Academic Project &bull; Woxsen University &bull; MySQL 8.0 & Flask Architecture
+            </small>
+        </footer>
+    </main>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Application JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
