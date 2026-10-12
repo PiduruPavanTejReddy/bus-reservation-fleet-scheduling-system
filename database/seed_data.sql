@@ -26,9 +26,11 @@ TRUNCATE TABLE admin_users;
 
 -- 1. ADMIN USERS
 INSERT INTO admin_users (username, password_hash, full_name, role) VALUES
-('admin', 'scrypt:32768:8:1$05XATcgTaCQhtGf0$b3b1e5c2923c6968acf3211e8cb697d56dc22ec362720e2587fd107808b4695e20a58626384af420abda5d00b595631df42d6bca6b61970ed3fcf30c0d7689fb', 'System Administrator', 'ADMIN'),
-('dispatcher1', 'scrypt:32768:8:1$vRDao8TyiWtesP2P$2e716ee9bbe22ce4cee66b9009b3f86061577f362b58d016dbfbcb92b706cfc81357202e2736d9bd90d6925347320247202d4d2beb99785e226390ca09dd99a4', 'Ramesh Varma', 'DISPATCHER'),
-('operator1', 'scrypt:32768:8:1$vRDao8TyiWtesP2P$2e716ee9bbe22ce4cee66b9009b3f86061577f362b58d016dbfbcb92b706cfc81357202e2736d9bd90d6925347320247202d4d2beb99785e226390ca09dd99a4', 'Sneha Reddy', 'OPERATOR');
+('admin', 'scrypt:32768:8:1$z6CO2ztjc7l9j77G$bf982693ec6de67598cab707def18383734316bec0db6ec01d85d318e10dce387b1b757f1da5d05211f6f7e537b791be16239ae36965095a731b74182b2e84c6', 'System Administrator', 'ADMIN'),
+('dispatcher', 'scrypt:32768:8:1$HbCosM0jvxfV79xS$123aa0306e2c557114893c3e1a0d0e88e6bd3d0d452ed742ed65c5d4c1301b9ef8fb25a91cccefe540d4bd6458d761607c434c260069e1da9323c04e5479ba49', 'Fleet Dispatcher', 'DISPATCHER'),
+('dispatcher1', 'scrypt:32768:8:1$HbCosM0jvxfV79xS$123aa0306e2c557114893c3e1a0d0e88e6bd3d0d452ed742ed65c5d4c1301b9ef8fb25a91cccefe540d4bd6458d761607c434c260069e1da9323c04e5479ba49', 'Ramesh Varma', 'DISPATCHER'),
+('operator', 'scrypt:32768:8:1$20w8W2s6IZ4ai5Nc$5be6fe33661e9285c88795afc6cf320b1fb12a0e260a31aa23592705be9e3a6f938fc9817d96a358ef4356eb126243e451151023cc8d8ae0a14175d1cee359db', 'Counter Operator', 'OPERATOR'),
+('operator1', 'scrypt:32768:8:1$20w8W2s6IZ4ai5Nc$5be6fe33661e9285c88795afc6cf320b1fb12a0e260a31aa23592705be9e3a6f938fc9817d96a358ef4356eb126243e451151023cc8d8ae0a14175d1cee359db', 'Sneha Reddy', 'OPERATOR');
 
 -- 2. BUSES
 INSERT INTO buses (bus_id, registration_number, bus_number, bus_type, total_seats, status) VALUES

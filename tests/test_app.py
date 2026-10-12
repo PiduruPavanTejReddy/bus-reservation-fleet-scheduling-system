@@ -21,11 +21,23 @@ def test_login_page(client):
     assert b'Sign In to Dashboard' in response.data
 
 def test_login_and_dashboard_flow(client):
-    # Perform successful login
+    # Perform successful admin login
     res = client.post('/login', data={'username': 'admin', 'password': 'admin123'}, follow_redirects=True)
     assert res.status_code == 200
     assert b'Fleet Operations Dashboard' in res.data
     assert b'Total Buses' in res.data
+
+def test_dispatcher_login(client):
+    # Test dispatcher login
+    res = client.post('/login', data={'username': 'dispatcher1', 'password': 'dispatcher123'}, follow_redirects=True)
+    assert res.status_code == 200
+    assert b'Fleet Operations Dashboard' in res.data
+
+def test_operator_login(client):
+    # Test operator login
+    res = client.post('/login', data={'username': 'operator1', 'password': 'operator123'}, follow_redirects=True)
+    assert res.status_code == 200
+    assert b'Fleet Operations Dashboard' in res.data
 
 def test_authenticated_pages(client):
     # Log in first

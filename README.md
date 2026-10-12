@@ -525,7 +525,8 @@ tests/test_database.py::test_database_views_accessibility PASSED         [100%]
 
 ### Default Login Credentials
 - **Administrator**: `admin` / `admin123`
-- **Dispatcher**: `dispatcher1` / `dispatch123`
+- **Fleet Dispatcher**: `dispatcher1` / `dispatcher123` (or `dispatcher` / `dispatcher123`)
+- **Counter Operator**: `operator1` / `operator123` (or `operator` / `operator123`)
 
 ---
 

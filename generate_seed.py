@@ -30,12 +30,15 @@ def generate_seed_sql():
     
     # 1. Admin Users
     admin_hash = generate_password_hash("admin123")
-    disp_hash = generate_password_hash("dispatch123")
+    disp_hash = generate_password_hash("dispatcher123")
+    op_hash = generate_password_hash("operator123")
     sql.append("-- 1. ADMIN USERS")
     sql.append("INSERT INTO admin_users (username, password_hash, full_name, role) VALUES")
     sql.append(f"('admin', '{admin_hash}', 'System Administrator', 'ADMIN'),")
+    sql.append(f"('dispatcher', '{disp_hash}', 'Fleet Dispatcher', 'DISPATCHER'),")
     sql.append(f"('dispatcher1', '{disp_hash}', 'Ramesh Varma', 'DISPATCHER'),")
-    sql.append(f"('operator1', '{disp_hash}', 'Sneha Reddy', 'OPERATOR');\n")
+    sql.append(f"('operator', '{op_hash}', 'Counter Operator', 'OPERATOR'),")
+    sql.append(f"('operator1', '{op_hash}', 'Sneha Reddy', 'OPERATOR');\n")
 
     # 2. Buses (12 buses)
     buses = [
